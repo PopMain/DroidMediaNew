@@ -7,13 +7,19 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.AsyncTask;
+import android.os.Looper;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 
+import com.popmain.droidmedia.DroidMediaApplication;
 import com.popmain.droidmedia.R;
+import com.popmain.droidmedia.util.AsyncRunnableWorker;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Created by wzx on 2017/10/24.
@@ -22,6 +28,8 @@ import com.popmain.droidmedia.R;
 public class CustomImageView extends View {
 
     private Bitmap mBitmap;
+    private final Paint paint = new Paint();
+    private final Rect dest = new Rect();
 
     public CustomImageView(Context context) {
         this(context, null);
@@ -34,33 +42,56 @@ public class CustomImageView extends View {
 
     public CustomImageView(final Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        AsyncTask asyncTask = new AsyncTask() {
-            @Override
-            protected Object doInBackground(Object[] params) {
-                mBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.image);
-                return null;
-            }
+        AsyncRunnableWorker.execute(new InnerRunnable(this));
+    }
 
-            @Override
-            protected void onPostExecute(Object o) {
-                invalidate();
-                super.onPostExecute(o);
-            }
-        };
-        asyncTask.execute();
+    private void setBitmapData(Bitmap bitmap) {
+        mBitmap = bitmap;
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            invalidate();
+        } else {
+            postInvalidate();
+        }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        Log.e("wzx", "AT_MOST " + MeasureSpec.AT_MOST + " EXACTLY " + MeasureSpec.EXACTLY + " UNSPECIFIED " + MeasureSpec.UNSPECIFIED);
+        Log.e("wzx", "widthMode " + MeasureSpec.getMode(widthMeasureSpec) + "  widthSize " + MeasureSpec.getSize(widthMeasureSpec));
+        if (mBitmap != null) {
+            int with = mBitmap.getWidth() / 2;
+            int height = mBitmap.getHeight() / 2;
+            setMeasuredDimension(with, height);
+        }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        Paint paint = new Paint();
          if (mBitmap != null) {
-             Rect dest = new Rect(0, 0, mBitmap.getWidth() / 2, mBitmap.getHeight() / 2);
+             dest.set(0, 0, mBitmap.getWidth() / 2, mBitmap.getHeight() / 2);
              ViewGroup.LayoutParams layoutParams = getLayoutParams();
-             layoutParams.height = dest.height();
-             layoutParams.width = dest.width();
-             requestLayout();
              canvas.drawBitmap(mBitmap, null, dest, paint);
          }
+    }
+
+
+    static class InnerRunnable implements Runnable {
+
+        final WeakReference<CustomImageView> viewWeakRef;
+
+        InnerRunnable(CustomImageView view) {
+            viewWeakRef = new WeakReference(view);
+        }
+
+        @Override
+        public void run() {
+            Bitmap bitmap = BitmapFactory.decodeResource(DroidMediaApplication.getsDroidMediaApplication().getResources(), R.drawable.image);
+            CustomImageView customImageView = viewWeakRef.get();
+            if (customImageView != null) {
+                customImageView.setBitmapData(bitmap);
+            }
+        }
     }
 }

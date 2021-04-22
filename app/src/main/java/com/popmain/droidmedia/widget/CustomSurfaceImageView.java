@@ -11,6 +11,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.popmain.droidmedia.R;
+import com.popmain.droidmedia.util.AsyncRunnableWorker;
 
 
 /**
@@ -81,7 +82,7 @@ public class CustomSurfaceImageView extends SurfaceView implements SurfaceHolder
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        new Thread(this).start();
+        AsyncRunnableWorker.execute(this);
     }
 
     @Override
