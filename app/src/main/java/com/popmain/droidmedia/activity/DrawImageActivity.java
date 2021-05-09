@@ -15,11 +15,13 @@ import com.popmain.droidmedia.util.BitmapSizeReduce;
 
 public class DrawImageActivity extends AppCompatActivity implements View.OnClickListener {
     ImageView ivImage;
+    ImageView ivImage2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw_image);
         ivImage = findViewById(R.id.ivGlide);
+        ivImage2 = findViewById(R.id.ivGlide2);
 //        Glide.with(this)
 //                .load(R.drawable.image)
 //                .centerCrop()
@@ -27,6 +29,7 @@ public class DrawImageActivity extends AppCompatActivity implements View.OnClick
         findViewById(R.id.btnBitmapReused).setOnClickListener(this);
         findViewById(R.id.btnBitmapSize).setOnClickListener(this);
         findViewById(R.id.btnBitmapReduce).setOnClickListener(this);
+        findViewById(R.id.btnBitmapReused2).setOnClickListener(this);
     }
 
     @Override
@@ -41,6 +44,9 @@ public class DrawImageActivity extends AppCompatActivity implements View.OnClick
             case R.id.btnBitmapReused:
                 memoryCache();
                 break;
+            case R.id.btnBitmapReused2:
+                clearLRUAndReused();
+                break;
             default:
                 break;
         }
@@ -53,24 +59,27 @@ public class DrawImageActivity extends AppCompatActivity implements View.OnClick
     private void memoryCache() {
 
         // 第一次从 LruCache 内存中获取 Bitmap 数据
-        Bitmap bitmap = BitmapLruCacheMemoryReuse.getInstance().getBitmapFromLruCache(R.drawable.image + "");
+        Bitmap bitmap = BitmapLruCacheMemoryReuse.getInstance().getBitmapFromLruCache(R.drawable.photo + "");
 
         /*
             如果从内存中获取 Bitmap 对象失败 , 这里就需要创建该图片 , 并放入 LruCache 内存中
          */
         if(bitmap == null){
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeResource(getResources(), R.drawable.photo, options);
             // 要复用内存的 Bitmap 对象 , 将新的 Bitmap 写入到该 Bitmap 内存中
             Bitmap inBitmap;
             // 尝试获取复用对象
             inBitmap = BitmapLruCacheMemoryReuse.getInstance().
-                    getReuseBitmap(200, 200, 1);
+                    getReuseBitmap(options.outWidth, options.outHeight, 1);
             // 加载指定大小格式的图像
-            bitmap = BitmapSizeReduce.getResizedBitmap(this, R.drawable.image,
-                    200, 200, false, inBitmap);
+            bitmap = BitmapSizeReduce.getResizedBitmap(this, R.drawable.photo,
+                    options.outWidth, options.outHeight, false, inBitmap);
 
             // 将新的 bitap 放入 LruCache 内存缓存中
             BitmapLruCacheMemoryReuse.getInstance().
-                    putBitmapToLruCache(R.drawable.image + "", bitmap);
+                    putBitmapToLruCache(R.drawable.photo + "", bitmap);
 
             Log.i("Bitmap 没有获取到创建新的", "image : " + bitmap.getWidth() + " , " +
                     bitmap.getHeight() + " , " +
@@ -84,13 +93,25 @@ public class DrawImageActivity extends AppCompatActivity implements View.OnClick
 
 
 
-        // 第一次从 LruCache 内存中获取 Bitmap 数据
+        // 第二次从 LruCache 内存中获取 Bitmap 数据
         Bitmap bitmap2 = BitmapLruCacheMemoryReuse.getInstance().
-                getBitmapFromLruCache(R.drawable.image + "");
+                getBitmapFromLruCache(R.drawable.photo + "");
 
         Log.i("Bitmap 第二次内存中获取数据", "image : " + bitmap2.getWidth() + " , " +
                 bitmap2.getHeight() + " , " +
                 bitmap2.getByteCount());
+    }
+
+    private void clearLRUAndReused() {
+        BitmapLruCacheMemoryReuse.getInstance().clearLruCache();
+        // 尝试获取复用对象
+        Bitmap inBitmap = BitmapLruCacheMemoryReuse.getInstance().
+                getReuseBitmap(200, 200, 1);
+        Log.i("Bitmap", "get inBitmap success " + (inBitmap != null));
+        // 加载指定大小格式的图像
+        Bitmap bitmap = BitmapSizeReduce.getResizedBitmap(this, R.drawable.image,
+                200, 200, false, inBitmap);
+        ivImage2.setImageBitmap(bitmap);
     }
 
     /**
@@ -112,6 +133,7 @@ public class DrawImageActivity extends AppCompatActivity implements View.OnClick
                 reduceSizeBitmap.getHeight() + " , " +
                 reduceSizeBitmap.getByteCount());
         ivImage.setImageBitmap(reduceSizeBitmap);
+        ivImage2.setImageBitmap(reduceSizeBitmap);
     }
 
 

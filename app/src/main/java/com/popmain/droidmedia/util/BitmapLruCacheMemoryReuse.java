@@ -12,6 +12,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.util.Log;
 import android.util.LruCache;
 
 import java.lang.ref.Reference;
@@ -163,6 +164,7 @@ public class BitmapLruCacheMemoryReuse {
                     因此这里需要处理 Bitmap 内存在 Native 层的情况 , 监控到 Java 层的弱引用被释放了
                     需要调用 Bitmap 对象的 recycle 方法 , 释放 Native 层的内存
                  */
+                Log.i("wzx", "key " + key + " evicted, isMutable " + oldValue.isMutable());
                 if(oldValue.isMutable()){   // 可以被复用
                     // 将其放入弱引用中 , 每次 GC 启动后 , 如果该弱引用没有被使用 , 都会被回收
                     bitmapReusePool.add(new WeakReference<>(oldValue, referenceQueue));
@@ -327,6 +329,7 @@ public class BitmapLruCacheMemoryReuse {
     public Bitmap getBitmapFromLruCache(String key){
         return mLruCache.get(key);
     }
+
 
     /**
      * 清除 LruCache 缓存
