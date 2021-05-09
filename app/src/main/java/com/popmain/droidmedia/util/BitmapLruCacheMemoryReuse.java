@@ -16,7 +16,7 @@ import android.util.LruCache;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
-import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,17 +56,17 @@ public class BitmapLruCacheMemoryReuse {
      *
      * 需要使用引用队列监控弱引用的释放情况
      */
-    Set<SoftReference<Bitmap>> bitmapReusePool;
+    Set<WeakReference<Bitmap>> bitmapReusePool;
 
     /**
-     * 引用队列 , 用于监控 Set<SoftReference<Bitmap>> bitmapReusePool 的内存是否被回收
+     * 引用队列 , 用于监控 Set<WeakReference<Bitmap>> bitmapReusePool 的内存是否被回收
      * 需要维护一个线程 , 不断尝试从该引用队列中获取引用
      *
      */
     private ReferenceQueue<Bitmap> referenceQueue;
 
     /**
-     * 监控 Set<SoftReference<Bitmap>> bitmapReusePool 的内存是否被回收 ,
+     * 监控 Set<WeakReference<Bitmap>> bitmapReusePool 的内存是否被回收 ,
      * 调用 ReferenceQueue<Bitmap> referenceQueue 的 remove 方法 ,
      * 查看是否存在被回收的弱引用 , 如果存在 , 直接回收该弱引用对应的 Bitmap 对象
      */
@@ -165,7 +165,7 @@ public class BitmapLruCacheMemoryReuse {
                  */
                 if(oldValue.isMutable()){   // 可以被复用
                     // 将其放入弱引用中 , 每次 GC 启动后 , 如果该弱引用没有被使用 , 都会被回收
-                    bitmapReusePool.add(new SoftReference<>(oldValue, referenceQueue));
+                    bitmapReusePool.add(new WeakReference<>(oldValue, referenceQueue));
                 }else{  // 不可被复用 , 直接回收
                     oldValue.recycle();
                 }
@@ -178,7 +178,7 @@ public class BitmapLruCacheMemoryReuse {
      */
     private void initBitmapReusePool(){
         // 创建一个线程安全的 HashSet , 其中的元素是 Bitmap 弱引用
-        bitmapReusePool = Collections.synchronizedSet(new HashSet<SoftReference<Bitmap>>());
+        bitmapReusePool = Collections.synchronizedSet(new HashSet<WeakReference<Bitmap>>());
         // 引用队列 , 当弱引用被 GC 扫描后 , 需要回收 , 会将该弱引用放入队列
         // 一直不断的尝试从该引用队列中获取数据 , 如果获取到数据 , 就要回收该对象
         referenceQueue = new ReferenceQueue<>();
@@ -237,7 +237,7 @@ public class BitmapLruCacheMemoryReuse {
         // 获取准备复用的 Bitmap , 之后设置到 Options 中
         Bitmap inBitmap = null;
         // 使用迭代器遍历该 Set 集合 , 如果遍历中涉及到删除 , 就要使用迭代器遍历
-        Iterator<SoftReference<Bitmap>> iterator = bitmapReusePool.iterator();
+        Iterator<WeakReference<Bitmap>> iterator = bitmapReusePool.iterator();
         //迭代查找符合复用条件的Bitmap
         while (iterator.hasNext()){
             // 循环遍历 Bitmap 对象
