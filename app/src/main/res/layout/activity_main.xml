@@ -24,7 +24,7 @@
             android:id="@+id/btn_go2_draw_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="画一张图片"/>
+            android:text="图片"/>
 
         <Button
             android:id="@+id/btn_go2_audio_recorder"

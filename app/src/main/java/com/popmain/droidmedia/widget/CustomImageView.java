@@ -48,21 +48,23 @@ public class CustomImageView extends View {
     private void setBitmapData(Bitmap bitmap) {
         mBitmap = bitmap;
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            invalidate();
+//            invalidate();
+            requestLayout();
         } else {
-            postInvalidate();
+//            postInvalidate();
+            post(this::requestLayout);
         }
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        Log.e("wzx", "AT_MOST " + MeasureSpec.AT_MOST + " EXACTLY " + MeasureSpec.EXACTLY + " UNSPECIFIED " + MeasureSpec.UNSPECIFIED);
-        Log.e("wzx", "widthMode " + MeasureSpec.getMode(widthMeasureSpec) + "  widthSize " + MeasureSpec.getSize(widthMeasureSpec));
         if (mBitmap != null) {
             int with = mBitmap.getWidth() / 2;
             int height = mBitmap.getHeight() / 2;
             setMeasuredDimension(with, height);
+        } else {
+            setMeasuredDimension(0, 0);
         }
     }
 
@@ -71,7 +73,6 @@ public class CustomImageView extends View {
         super.onDraw(canvas);
          if (mBitmap != null) {
              dest.set(0, 0, mBitmap.getWidth() / 2, mBitmap.getHeight() / 2);
-             ViewGroup.LayoutParams layoutParams = getLayoutParams();
              canvas.drawBitmap(mBitmap, null, dest, paint);
          }
     }
