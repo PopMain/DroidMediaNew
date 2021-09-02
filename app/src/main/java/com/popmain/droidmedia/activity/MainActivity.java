@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         findViewById(R.id.btn_go2_draw_image).setOnClickListener(this);
+        findViewById(R.id.btn_go2_surface_texture_view).setOnClickListener(this);
         findViewById(R.id.btn_go2_audio_recorder).setOnClickListener(this);
         findViewById(R.id.btn_go2_camera_api).setOnClickListener(this);
     }
@@ -34,6 +35,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.btn_go2_draw_image:
                 go2DrawImage();
+                break;
+            case R.id.btn_go2_surface_texture_view:
+                go2SurfaceTextureView();
                 break;
             case R.id.btn_go2_audio_recorder:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -62,6 +66,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void go2DrawImage() {
         Intent intent = new Intent(this, DrawImageActivity.class);
+        startActivity(intent);
+    }
+
+
+    private void go2SurfaceTextureView() {
+        Intent intent = new Intent(this, SurfaceTextureViewActivity.class);
         startActivity(intent);
     }
 

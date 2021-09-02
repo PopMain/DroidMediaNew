@@ -7,11 +7,13 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.popmain.droidmedia.R;
 import com.popmain.droidmedia.util.AsyncRunnableWorker;
+import com.popmain.droidmedia.util.Logger;
 
 
 /**
@@ -52,30 +54,15 @@ public class CustomSurfaceImageView extends SurfaceView implements SurfaceHolder
         float scale = (float) mBitmapOptions.inTargetDensity / mBitmapOptions.inDensity;
         mBitmapWidth = (int) (mBitmapOptions.outWidth * scale + 0.5f);
         mBitmapHeight = (int) (mBitmapOptions.outHeight * scale + 0.5f);
+        Log.d("CustomSurfaceImageView", "bW="+mBitmapWidth+",bH="+mBitmapHeight);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int widthMeasureMode = MeasureSpec.getMode(widthMeasureSpec);
-        int heightMeasureMode = MeasureSpec.getMode(heightMeasureSpec);
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        int finalWidth = 0;
-        int finalHeight = 0;
-
-        if (widthMeasureMode == MeasureSpec.EXACTLY) {
-            finalWidth = widthSize;
-        } else if (widthMeasureMode == MeasureSpec.AT_MOST) {
-            finalWidth = mBitmapWidth / 2;
-        }
-
-        if (heightMeasureMode == MeasureSpec.EXACTLY) {
-            finalHeight = heightSize;
-        } else if (heightMeasureMode == MeasureSpec.AT_MOST) {
-            finalHeight = mBitmapHeight / 2;
-        }
+        int finalWidth = mBitmapWidth / 2;
+        int finalHeight = mBitmapHeight / 2;
 
         setMeasuredDimension(finalWidth, finalHeight);
     }

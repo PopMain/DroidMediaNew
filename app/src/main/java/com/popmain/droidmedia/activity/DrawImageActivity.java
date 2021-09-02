@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,9 +14,13 @@ import com.popmain.droidmedia.R;
 import com.popmain.droidmedia.util.BitmapLruCacheMemoryReuse;
 import com.popmain.droidmedia.util.BitmapSizeReduce;
 
+/**
+ * 图片&Bitmap相关
+ */
 public class DrawImageActivity extends AppCompatActivity implements View.OnClickListener {
     ImageView ivImage;
     ImageView ivImage2;
+    TextView infoTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +31,7 @@ public class DrawImageActivity extends AppCompatActivity implements View.OnClick
 //                .load(R.drawable.image)
 //                .centerCrop()
 //                .into(ivGlide);
+        infoTextView = findViewById(R.id.tvInfo);
         findViewById(R.id.btnBitmapReused).setOnClickListener(this);
         findViewById(R.id.btnBitmapSize).setOnClickListener(this);
         findViewById(R.id.btnBitmapReduce).setOnClickListener(this);
@@ -141,21 +147,26 @@ public class DrawImageActivity extends AppCompatActivity implements View.OnClick
      * 分析 Bitmap 内存占用情况
      */
     private void showBitmapMemory(){
+        StringBuilder infoBuilder = new StringBuilder();
         Log.i("Bitmap", "getResources().getDisplayMetrics().densityDpi : " +
                 getResources().getDisplayMetrics().densityDpi +
                 " , getResources().getDisplayMetrics().density : " +
                 getResources().getDisplayMetrics().density);
-
+        infoBuilder.append("DensityDpi: " + getResources().getDisplayMetrics().densityDpi + "\n");
+        infoBuilder.append("Density: " + getResources().getDisplayMetrics().density + "\n");
         // 从资源文件中加载内存
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.image);
         // 打印 Bitmap 对象的宽高, 字节大小
         Log.i("Bitmap", "image : " + bitmap.getWidth() + " , " +
                 bitmap.getHeight() + " , " +
                 bitmap.getByteCount());
+        infoBuilder.append("R.drawable.image: width=" + bitmap.getWidth() + " , height=" + bitmap.getHeight() + " , byteCount=" + bitmap.getByteCount() + "\n");
         bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.photo);
         // 打印 Bitmap 对象的宽高, 字节大小
         Log.i("Bitmap", "photo : " + bitmap.getWidth() + " , " +
                 bitmap.getHeight() + " , " +
                 bitmap.getByteCount());
+        infoBuilder.append("R.drawable.image: width=" + bitmap.getWidth() + " , height=" + bitmap.getHeight() + " , byteCount=" + bitmap.getByteCount() + "\n");
+        infoTextView.setText(infoBuilder.toString());
     }
 }
